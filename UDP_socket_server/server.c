@@ -3,6 +3,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <string.h>
 
 void error (char *msg);
 
@@ -26,8 +27,8 @@ int main(int argc, char *argv[]){
     struct in_addr { 
         unsigned long s_addr;       // 4 bytes load with inet_pton() 
     };*/
-    struct sockaddr_in server;
-    struct sockaddr_in from;
+    struct sockaddr_in server;      // server address
+    struct sockaddr_in from;        // client address
     char buffer[1024];              // sebding and receiving data
 
     if(argc < 2){
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]){
     bzero(&server, length);                 // equals to memset
     server.sin_family = AF_INET;            // IPv4 Address Family
     server.sin_addr.s_addr = INADDR_ANY;    // local/server IP or server.sin_addr.s_addr = inet_addr(¡§140.115.65.1¡¨)
-    server.sinport = htons(atoi(argv[1]));  // htons: make the integer network format
+    server.sin_port = htons(atoi(argv[1]));  // htons: make the integer network format
     
     // bind() assigns a name to a socket
     // int bind(int sockfd, const struct sockaddr *address, socklen_t address_len);
@@ -74,10 +75,10 @@ int main(int argc, char *argv[]){
             error("recvfrom...");
         }
 
-        write(1, "Received a datagram: ", 21);
-        write(1, buffer, n);
-
-        n = sendto(sock, "This is message from UDP Server\n", 17,
+        printf("Received a datagram from client: %s", buffer);
+        
+        // return to client
+        n = sendto(sock, "This is message from UDP Server\n", strlen("This is message from UDP Server\n"),
                    0, (struct sockaddr *)&from, fromlen);
         if(n < 0){
             error("sendto failed");

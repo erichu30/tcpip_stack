@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <string.h>
 
 void error (char *msg);
 
@@ -42,20 +43,19 @@ int main(int argc, char *argv[]){
     printf("You can enter some message now: ");
     fgets(buffer, 256, stdin);
 
-    n = sendto(sock, buffer, strlen(buffer), 0, &server, length);
+    n = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr*)&server, length);
     if(n < 0){
         error("sendto failed");
     }
 
     bzero(buffer, 256);
-    n = recvfrom(sock, buffer, 256, 0, &from, &length);
+    n = recvfrom(sock, buffer, 256, 0, (struct sockaddr*)&from, &length);
     if(n < 0){
         error("recvfrom failed");
     }
-    
-    write(1, "Got an ACK: ", 12);
-    write(1, buffer, n);
 
+    printf("Got an ACK from serevr: %s\n", buffer);
+    
     return 0;
 }
 
